@@ -4,24 +4,65 @@
  */
 package com.mycompany.crud_jas;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import com.mycompany.Crud_JAs.MsAccess;
+
 /**
  *
  * @author CL2-PC
  */
 public class CrudDesign extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CrudDesign.class.getName());
+Connection conn;
+PreparedStatement pst;
+ResultSet rs;
+    private static final java.util.logging.Logger logger =
+            java.util.logging.Logger.getLogger(CrudDesign.class.getName());
 
-    /**
-     * Creates new form CrudDesign
-     */
     public CrudDesign() {
         initComponents();
-    }
+        conn = MsAccess.conn();
 
+        if (conn == null) {
+    JOptionPane.showMessageDialog(null, "Database connection failed!");
+}
+    }
+    public void loadData() {
+
+        try {
+
+            String sql = "SELECT * FROM Students";
+
+            java.sql.PreparedStatement pst =
+                    conn.prepareStatement(sql);
+
+            ResultSet rs = pst.executeQuery();
+
+            DefaultTableModel model =
+                    (DefaultTableModel) tblStudents.getModel();
+
+            model.setRowCount(0);
+
+            while (rs.next()) {
+
+                model.addRow(new Object[]{
+                    rs.getString("name"),
+                    rs.getString("section"),
+                    rs.getString("course")
+                });
+            }
+
+            rs.close();
+            pst.close();
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(this,
+                    "Load Data Error: " + e.getMessage());
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -36,21 +77,21 @@ public class CrudDesign extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        txtCourse = new javax.swing.JTextField();
         txtSection = new javax.swing.JTextField();
         txtName = new javax.swing.JTextField();
         txtStudID = new javax.swing.JTextField();
-        btnClear = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
         btnCreate = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblStudents = new javax.swing.JTable();
         jPanel5 = new javax.swing.JPanel();
+        cmbCourse = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
         btnUpdate = new javax.swing.JButton();
+        btnRead = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -69,18 +110,9 @@ public class CrudDesign extends javax.swing.JFrame {
 
         jLabel5.setText("Student ID:");
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 220, -1, -1));
-        getContentPane().add(txtCourse, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 340, 150, -1));
         getContentPane().add(txtSection, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 300, 150, -1));
         getContentPane().add(txtName, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 260, 150, -1));
         getContentPane().add(txtStudID, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 220, 150, -1));
-
-        btnClear.setText("Clear");
-        btnClear.addActionListener(this::btnClearActionPerformed);
-        getContentPane().add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 410, -1, -1));
-
-        btnDelete.setText("Delete");
-        btnDelete.addActionListener(this::btnDeleteActionPerformed);
-        getContentPane().add(btnDelete, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 410, -1, -1));
 
         btnCreate.setText("Create");
         btnCreate.addActionListener(this::btnCreateActionPerformed);
@@ -91,21 +123,6 @@ public class CrudDesign extends javax.swing.JFrame {
 
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(52, 198, -1, -1));
-
-        jPanel4.setBackground(new java.awt.Color(159, 195, 231));
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 450, Short.MAX_VALUE)
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 390, Short.MAX_VALUE)
-        );
-
-        jPanel2.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 70, 450, 390));
 
         tblStudents.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -123,17 +140,10 @@ public class CrudDesign extends javax.swing.JFrame {
         jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 40, -1, 420));
 
         jPanel5.setBackground(new java.awt.Color(255, 228, 228));
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 280, Short.MAX_VALUE)
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 160, Short.MAX_VALUE)
-        );
+        cmbCourse.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ACT", "HM", "BSOA", "BSE", " " }));
+        jPanel5.add(cmbCourse, new org.netbeans.lib.awtextra.AbsoluteConstraints(109, 122, 153, 30));
 
         jPanel2.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 220, 280, 160));
 
@@ -143,7 +153,19 @@ public class CrudDesign extends javax.swing.JFrame {
 
         btnUpdate.setText("Update");
         btnUpdate.addActionListener(this::btnUpdateActionPerformed);
-        jPanel2.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 430, -1, -1));
+        jPanel2.add(btnUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 420, -1, -1));
+
+        btnRead.setText("Read");
+        btnRead.addActionListener(this::btnReadActionPerformed);
+        jPanel2.add(btnRead, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 420, -1, -1));
+
+        btnDelete.setText("Delete");
+        btnDelete.addActionListener(this::btnDeleteActionPerformed);
+        jPanel2.add(btnDelete, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 470, -1, -1));
+
+        btnClear.setText("Clear");
+        btnClear.addActionListener(this::btnClearActionPerformed);
+        jPanel2.add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 470, -1, -1));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(-30, -10, 940, 590));
 
@@ -151,127 +173,88 @@ public class CrudDesign extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCreateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateActionPerformed
-     try {
-        Connection con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/student_crud", "root", "");
+  if (conn == null) {
+            JOptionPane.showMessageDialog(this, "No database connection.");
+            return;
+        }
 
-        String sql = "INSERT INTO students VALUES (?, ?, ?, ?)";
-        PreparedStatement pst = con.prepareStatement(sql);
+        if (txtName.getText().trim().isEmpty()
+                || txtSection.getText().trim().isEmpty()
+                || cmbCourse.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Please complete all fields.");
+            return;
+        }
 
-        pst.setString(1, txtStudID.getText());
-        pst.setString(2, txtName.getText());
-        pst.setString(3, txtSection.getText());
-        pst.setString(4, txtCourse.getText());
+        String sql = "INSERT INTO Students (name, section, course) VALUES (?, ?, ?)";
 
-        pst.executeUpdate();
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, txtName.getText().trim());
+            pst.setString(2, txtSection.getText().trim());
+            pst.setString(3, cmbCourse.getSelectedItem().toString());
 
-        JOptionPane.showMessageDialog(this, "Student added successfully!");
+            pst.executeUpdate();
 
-        txtStudID.setText("");
-        txtName.setText("");
-        txtSection.setText("");
-        txtCourse.setText("");
+            JOptionPane.showMessageDialog(this, "Student added successfully!");
+            loadData();
 
-        con.close();
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, e.getMessage());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Create Error: " + e.getMessage());
+        
     }
 
     }//GEN-LAST:event_btnCreateActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-    
-    String studentID = txtStudID.getText().trim();
-    String name = txtName.getText().trim();
-    String section = txtSection.getText().trim();
-    String course = txtCourse.getText().trim();
+        try {
 
-    if (studentID.isEmpty() || name.isEmpty()
-            || section.isEmpty() || course.isEmpty()) {
-        JOptionPane.showMessageDialog(this,
-                "Please fill in all fields.");
-        return;
-    }
+    String sql = "UPDATE Students SET name=?, section=?, course=? WHERE ID=?";
 
-    String url = "jdbc:mysql://localhost:3306/student_crud";
+    java.sql.PreparedStatement pst = conn.prepareStatement(sql);
 
-    String sql = "UPDATE students SET name = ?, "
-            + "section = ?, course = ? WHERE student_id = ?";
+    pst.setString(1, txtName.getText());
+    pst.setString(2, txtSection.getText());
+    pst.setString(3, cmbCourse.getSelectedItem().toString());
+    pst.setInt(4, Integer.parseInt(txtStudID.getText()));
 
-    try (Connection con = DriverManager.getConnection(url, "root", "");
-         PreparedStatement pst = con.prepareStatement(sql)) {
+    pst.executeUpdate();
 
-        pst.setString(1, name);
-        pst.setString(2, section);
-        pst.setString(3, course);
-        pst.setString(4, studentID);
+    JOptionPane.showMessageDialog(this, "Student updated successfully!");
 
-        int rowsUpdated = pst.executeUpdate();
+    loadData();
 
-        if (rowsUpdated > 0) {
-            JOptionPane.showMessageDialog(this,
-                    "Student updated successfully!");
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Student ID not found!");
-        }
+    } catch (Exception e) {
 
-    } catch (java.sql.SQLException e) {
-        JOptionPane.showMessageDialog(this,
-                "Database Error: " + e.getMessage());
-    }
+    JOptionPane.showMessageDialog(this, e.getMessage());
 
-    
+}
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-   
-    String studentID = txtStudID.getText().trim();
+    try {
 
-    if (studentID.isEmpty()) {
-        JOptionPane.showMessageDialog(this,
-                "Please enter the Student ID to delete.");
-        return;
-    }
+    String sql = "DELETE FROM Students WHERE ID=?";
 
-    int confirm = JOptionPane.showConfirmDialog(this,
-            "Are you sure you want to delete this student?",
-            "Confirm Delete",
-            JOptionPane.YES_NO_OPTION);
+    java.sql.PreparedStatement pst = conn.prepareStatement(sql);
 
-    if (confirm != JOptionPane.YES_OPTION) {
-        return;
-    }
+    pst.setInt(1, Integer.parseInt(txtStudID.getText()));
 
-    String url = "jdbc:mysql://localhost:3306/student_crud";
-    String sql = "DELETE FROM students WHERE student_id = ?";
+    pst.executeUpdate();
 
-    try (Connection con = DriverManager.getConnection(url, "root", "");
-         PreparedStatement pst = con.prepareStatement(sql)) {
+    JOptionPane.showMessageDialog(this, "Student deleted successfully!");
 
-        pst.setString(1, studentID);
+    loadData();
 
-        int rowsDeleted = pst.executeUpdate();
+    txtStudID.setText("");
+    txtName.setText("");
+    txtSection.setText("");
+    cmbCourse.getSelectedItem();
 
-        if (rowsDeleted > 0) {
-            JOptionPane.showMessageDialog(this,
-                    "Student deleted successfully!");
+    } catch (Exception e) {
 
-            txtStudID.setText("");
-            txtName.setText("");
-            txtSection.setText("");
-            txtCourse.setText("");
+    JOptionPane.showMessageDialog(this, e.getMessage());
 
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Student ID not found!");
-        }
-
-    } catch (java.sql.SQLException e) {
-        JOptionPane.showMessageDialog(this,
-                "Database Error: " + e.getMessage());
-    }
+}
 
     }//GEN-LAST:event_btnDeleteActionPerformed
 
@@ -280,9 +263,13 @@ public class CrudDesign extends javax.swing.JFrame {
     txtStudID.setText("");
     txtName.setText("");
     txtSection.setText("");
-    txtCourse.setText("");
+    cmbCourse.setSelectedIndex(0);
 
     }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnReadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReadActionPerformed
+    loadData();
+    }//GEN-LAST:event_btnReadActionPerformed
 
     /**
      * @param args the command line arguments
@@ -309,11 +296,14 @@ public class CrudDesign extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> new CrudDesign().setVisible(true));
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnCreate;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnRead;
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JComboBox<String> cmbCourse;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -322,11 +312,9 @@ public class CrudDesign extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblStudents;
-    private javax.swing.JTextField txtCourse;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtSection;
     private javax.swing.JTextField txtStudID;

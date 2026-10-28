@@ -1,22 +1,30 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-  
-package com.mycompany.crud_jas;
+package com.mycompany.Crud_JAs;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 public class MsAccess {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/student_crud";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+    public static Connection conn() {
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        try {
+
+            String url = "jdbc:ucanaccess://C:\\Users\\CL2-PC\\Documents\\student_crud.accdb";
+
+            Connection conn = DriverManager.getConnection(url);
+
+            System.out.println("Connected to MS Access!");
+
+            return conn;
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(null,
+                    "Database Connection Error:\n" + e.getMessage());
+
+            return null;
+        }
     }
 }
